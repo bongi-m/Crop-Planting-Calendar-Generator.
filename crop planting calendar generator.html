@@ -1,0 +1,2011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crop Planting Calendar Generator</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f7fa;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #2e7d32;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+        }
+        
+        .nav-link {
+            text-decoration: none;
+            color: #555;
+            font-weight: 600;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: #2e7d32;
+            color: white;
+        }
+        
+        /* Page Container */
+        .page {
+            display: none;
+            min-height: calc(100vh - 80px);
+            padding: 2rem;
+        }
+        
+        .page.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        /* Home Page */
+        #home {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+        
+        .hero {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 4rem 2rem;
+            border-radius: 15px;
+            margin-bottom: 3rem;
+            box-shadow: 0 10px 30px rgba(46, 125, 50, 0.2);
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            opacity: 0.9;
+            line-height: 1.8;
+        }
+        
+        .cta-buttons {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin-top: 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: white;
+            color: #2e7d32;
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+        }
+        
+        .cta-button.secondary {
+            background: transparent;
+            color: white;
+            border: 2px solid white;
+        }
+        
+        .cta-button.secondary:hover {
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .feature-card h3 {
+            color: #2e7d32;
+            margin-bottom: 1rem;
+        }
+        
+        /* Generate Page */
+        #generate {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .generate-container {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        
+        .page-title {
+            text-align: center;
+            color: #2e7d32;
+            margin-bottom: 2rem;
+            font-size: 2.5rem;
+        }
+        
+        .form-group {
+            margin-bottom: 2rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+            font-size: 1.1rem;
+        }
+        
+        .form-group select {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        
+        .form-group select:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+        
+        .province-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            border-left: 4px solid #2e7d32;
+        }
+        
+        .province-info h4 {
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+        
+        .province-info p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .generate-btn {
+            display: block;
+            width: 100%;
+            background: #2e7d32;
+            color: white;
+            padding: 1.2rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease, transform 0.2s ease;
+            margin-top: 2rem;
+        }
+        
+        .generate-btn:hover {
+            background: #1b5e20;
+            transform: translateY(-2px);
+        }
+        
+        /* About Page */
+        #about {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .page-header h1 {
+            color: #2e7d32;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+        
+        .page-header p {
+            color: #666;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .content-section {
+            background: white;
+            padding: 3rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 3rem;
+        }
+        
+        .content-section h2 {
+            color: #2e7d32;
+            margin-bottom: 2rem;
+            font-size: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 3px solid #e8f5e9;
+        }
+        
+        .content-section p {
+            margin-bottom: 1.5rem;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            color: #555;
+        }
+        
+        .highlight-box {
+            background: #e8f5e9;
+            padding: 2rem;
+            border-radius: 10px;
+            margin: 2rem 0;
+            border-left: 5px solid #2e7d32;
+        }
+        
+        .highlight-box h3 {
+            color: #1b5e20;
+            margin-bottom: 1rem;
+        }
+        
+        .goals-list, .users-list {
+            list-style: none;
+            margin: 1.5rem 0;
+        }
+        
+        .goals-list li, .users-list li {
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .goals-list li:last-child, .users-list li:last-child {
+            border-bottom: none;
+        }
+        
+        .goal-icon, .user-icon {
+            color: #2e7d32;
+            font-size: 1.2rem;
+            min-width: 30px;
+        }
+        
+        .users-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        
+        .user-card {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: transform 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .user-card:hover {
+            transform: translateY(-5px);
+            border-color: #2e7d32;
+        }
+        
+        .user-card-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: #2e7d32;
+        }
+        
+        .user-card h4 {
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* AI Chatbot Page */
+        #chatbot {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .chatbot-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            height: 70vh;
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .chatbot-header h2 {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .chatbot-header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            padding: 2rem;
+            overflow-y: auto;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .message.user {
+            justify-content: flex-end;
+        }
+        
+        .message-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+        
+        .message.user .message-avatar {
+            background: #2e7d32;
+            color: white;
+            order: 2;
+        }
+        
+        .message.ai .message-avatar {
+            background: #2196F3;
+            color: white;
+        }
+        
+        .message-content {
+            max-width: 70%;
+            padding: 1rem;
+            border-radius: 15px;
+            position: relative;
+        }
+        
+        .message.ai .message-content {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-top-left-radius: 0;
+        }
+        
+        .message.user .message-content {
+            background: #2e7d32;
+            color: white;
+            border-top-right-radius: 0;
+        }
+        
+        .message-text {
+            line-height: 1.5;
+        }
+        
+        .message-time {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 0.5rem;
+            text-align: right;
+        }
+        
+        .chat-input-area {
+            padding: 1.5rem;
+            border-top: 1px solid #e0e0e0;
+            background: white;
+        }
+        
+        .chat-input-container {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 25px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: #2e7d32;
+        }
+        
+        .send-button {
+            background: #2e7d32;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            transition: background 0.3s ease;
+        }
+        
+        .send-button:hover {
+            background: #1b5e20;
+        }
+        
+        /* Results Page */
+        #results {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .results-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+        
+        .selection-info {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .info-badge {
+            background: #e8f5e9;
+            padding: 0.5rem 1.5rem;
+            border-radius: 20px;
+            font-weight: 600;
+            color: #2e7d32;
+        }
+        
+        .charts-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            margin-bottom: 3rem;
+        }
+        
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        
+        .chart-container {
+            height: 400px;
+            border-radius: 10px;
+            background: #f8f9fa;
+            padding: 1rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+        }
+        
+        .chart-title {
+            text-align: center;
+            font-weight: 600;
+            color: #2e7d32;
+            margin-bottom: 1rem;
+            font-size: 1.2rem;
+        }
+        
+        /* Calendar Grid */
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        
+        .crop-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .crop-header {
+            background: linear-gradient(135deg, #2e7d32, #4caf50);
+            color: white;
+            padding: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .crop-name {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .crop-icon {
+            font-size: 2rem;
+        }
+        
+        .crop-details {
+            padding: 1.5rem;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+        
+        .detail-value {
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .date-value {
+            background: #e8f5e9;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        
+        .harvest-period {
+            background: #fff3e0;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.9rem;
+            color: #f57c00;
+        }
+        
+        .harvest-note {
+            font-size: 0.9rem;
+            color: #666;
+            font-style: italic;
+            margin-top: 0.3rem;
+        }
+        
+        /* Back Button */
+        .back-btn {
+            display: inline-block;
+            background: #e0e0e0;
+            color: #333;
+            padding: 0.8rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-top: 2rem;
+            transition: background 0.3s ease;
+        }
+        
+        .back-btn:hover {
+            background: #d0d0d0;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 2rem;
+            display: none;
+        }
+        
+        .loading.active {
+            display: block;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2e7d32;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Footer */
+        .footer {
+            background: #2e7d32;
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 4rem;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .nav-links {
+                gap: 1rem;
+            }
+            
+            .features, .users-grid, .charts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .generate-container, .content-section, .charts-section {
+                padding: 2rem;
+            }
+            
+            .calendar-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cta-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .cta-button {
+                width: 100%;
+                max-width: 300px;
+                text-align: center;
+            }
+            
+            .page-header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .chart-container {
+                height: 300px;
+            }
+            
+            .chatbot-container {
+                height: 80vh;
+            }
+            
+            .chat-messages {
+                padding: 1rem;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="#home" class="logo" onclick="showPage('home')">
+                🌱 Crop Calendar
+            </a>
+            <div class="nav-links">
+                <a href="#home" class="nav-link active" onclick="showPage('home')">Home</a>
+                <a href="#about" class="nav-link" onclick="showPage('about')">About</a>
+                <a href="#chatbot" class="nav-link" onclick="showPage('chatbot')">AI Assistant</a>
+                <a href="#generate" class="nav-link" onclick="showPage('generate')">Generate</a>
+                <a href="#results" class="nav-link" onclick="showPage('results')">Results</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Home Page -->
+    <div id="home" class="page active">
+        <div class="hero">
+            <h1>Crop Planting Calendar Generator</h1>
+            <p>A web-based application designed to help farmers determine the best planting and harvesting times for different crops.</p>
+            
+            <div class="cta-buttons">
+                <a href="#generate" class="cta-button" onclick="showPage('generate')">
+                    🌱 Generate Your Calendar
+                </a>
+                <a href="#about" class="cta-button secondary" onclick="showPage('about')">
+                    📖 Learn More About Us
+                </a>
+            </div>
+        </div>
+        
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon">🤖</div>
+                <h3>AI Assistant</h3>
+                <p>Get instant answers to your farming questions from our AI-powered agricultural assistant.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📊</div>
+                <h3>Data Visualization</h3>
+                <p>Interactive charts showing planting schedules, growth timelines, and seasonal patterns.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📍</div>
+                <h3>Region-Specific</h3>
+                <p>Tailored recommendations for all 9 South African provinces with district-level details.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- About Page -->
+    <div id="about" class="page">
+        <div class="page-header">
+            <h1>About the Project</h1>
+            <p>Learn about our mission, goals, and who we serve in the agricultural community</p>
+        </div>
+        
+        <div class="content-section">
+            <h2>Project Overview</h2>
+            <p>Crop Planting Calendar Generator is a web-based application designed to help farmers determine the best planting and harvesting times for different crops based on regional climate data and crop-specific requirements.</p>
+            
+            <p>The system combines agricultural science with technology to provide farmers with accurate, localized planting information. By considering factors like regional climate patterns, soil conditions, and crop growth requirements, we help optimize agricultural planning for better yields and sustainable farming practices.</p>
+            
+            <div class="highlight-box">
+                <h3>Our Mission</h3>
+                <p>To empower farmers across South Africa with accessible, data-driven tools that improve planting decisions, reduce crop failure risk, and promote sustainable agricultural practices.</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>Project Goals</h2>
+            <p>Our project aims to address key challenges in agricultural planning through the following objectives:</p>
+            
+            <ul class="goals-list">
+                <li>
+                    <span class="goal-icon">🎯</span>
+                    <span>Improve planting decisions for better crop yields through optimal timing</span>
+                </li>
+                <li>
+                    <span class="goal-icon">🛡️</span>
+                    <span>Reduce crop failure risk by providing region-specific planting windows</span>
+                </li>
+                <li>
+                    <span class="goal-icon">📊</span>
+                    <span>Support better agricultural planning using minimal input data</span>
+                </li>
+                <li>
+                    <span class="goal-icon">🌍</span>
+                    <span>Provide accessible tools for farmers of all scales and technical abilities</span>
+                </li>
+                <li>
+                    <span class="goal-icon">🌱</span>
+                    <span>Promote sustainable farming practices through informed decision-making</span>
+                </li>
+                <li>
+                    <span class="goal-icon">🤝</span>
+                    <span>Bridge the knowledge gap between agricultural research and practical farming</span>
+                </li>
+            </ul>
+            
+            <p>By achieving these goals, we aim to contribute to food security, improve farmer livelihoods, and support sustainable agricultural development in South Africa.</p>
+        </div>
+        
+        <div class="content-section">
+            <h2>Target Users</h2>
+            <p>Our platform is designed to serve a diverse range of stakeholders in the agricultural sector:</p>
+            
+            <div class="users-grid">
+                <div class="user-card">
+                    <div class="user-card-icon">👨‍🌾</div>
+                    <h4>Small Holder Farmers</h4>
+                    <p>Individual farmers with small plots who need simple, accessible planting guidance for subsistence and small-scale commercial farming.</p>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-card-icon">🏢</div>
+                    <h4>Emerging Farmers</h4>
+                    <p>Farmers transitioning from subsistence to commercial farming who need reliable planting schedules for market-oriented production.</p>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-card-icon">🏭</div>
+                    <h4>Commercial Farmers</h4>
+                    <p>Large-scale agricultural producers who require precise planting calendars for optimized production and supply chain management.</p>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-card-icon">👩‍🔬</div>
+                    <h4>Agricultural Extension Officers</h4>
+                    <p>Government and NGO field officers who provide technical support and need reliable tools to advise farmers effectively.</p>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-card-icon">🤝</div>
+                    <h4>Farming Cooperations</h4>
+                    <p>Agricultural collectives and cooperatives that coordinate planting schedules across multiple member farms for collective marketing.</p>
+                </div>
+                
+                <div class="user-card">
+                    <div class="user-card-icon">🌍</div>
+                    <h4>NGOs & Development Organizations</h4>
+                    <p>Organizations implementing agricultural development projects who need tools for planning and monitoring farming activities.</p>
+                </div>
+            </div>
+            
+            <div class="highlight-box">
+                <h3>Why Our Platform is Unique</h3>
+                <p>Unlike generic planting calendars, our system provides province-specific recommendations for all 9 South African provinces, with district-level adjustments where available. We combine traditional agricultural knowledge with modern data analytics to deliver practical, actionable insights.</p>
+            </div>
+        </div>
+        
+        <div class="content-section">
+            <h2>How It Works</h2>
+            <p>Our system uses a logic-based approach to generate planting calendars:</p>
+            
+            <ul class="goals-list">
+                <li>
+                    <span class="goal-icon">1️⃣</span>
+                    <span><strong>Select Region:</strong> Choose your province and district for location-specific recommendations</span>
+                </li>
+                <li>
+                    <span class="goal-icon">2️⃣</span>
+                    <span><strong>Choose Crop Type:</strong> Select from various crop categories including vegetables, fruits, grains, and more</span>
+                </li>
+                <li>
+                    <span class="goal-icon">3️⃣</span>
+                    <span><strong>Get Recommendations:</strong> Receive specific planting windows based on crop growth days and regional climate</span>
+                </li>
+                <li>
+                    <span class="goal-icon">4️⃣</span>
+                    <span><strong>Plan Your Season:</strong> Use the generated calendar with reminders for optimal planting, care, and harvesting</span>
+                </li>
+            </ul>
+            
+            <div style="text-align: center; margin-top: 2rem;">
+                <a href="#generate" class="cta-button" onclick="showPage('generate')" style="display: inline-block;">
+                    🚀 Start Using the Platform
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Chatbot Page -->
+    <div id="chatbot" class="page">
+        <div class="chatbot-container">
+            <div class="chatbot-header">
+                <h2>🤖 Farming AI Assistant</h2>
+                <p>Ask me anything about crop planting, harvesting, pest control, or agricultural practices</p>
+            </div>
+            
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will appear here -->
+            </div>
+            
+            <div class="chat-input-area">
+                <div class="chat-input-container">
+                    <input type="text" 
+                           class="chat-input" 
+                           id="userInput" 
+                           placeholder="Ask me anything about farming... (e.g., When to plant carrots in Western Cape?)"
+                           onkeypress="handleKeyPress(event)">
+                    <button class="send-button" onclick="sendMessage()">➤</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Generate Page -->
+    <div id="generate" class="page">
+        <div class="generate-container">
+            <h2 class="page-title">Generate Your Calendar</h2>
+            <p style="text-align: center; margin-bottom: 2rem; color: #666;">Select your province, district, and crop type to generate a personalized planting calendar</p>
+            
+            <div class="form-group">
+                <label for="province">🇿🇦 Select Province</label>
+                <select id="province" onchange="updateProvinceInfo()">
+                    <option value="">Choose a province...</option>
+                    <option value="gauteng">Gauteng</option>
+                    <option value="kwazulu-natal">KwaZulu-Natal</option>
+                    <option value="western-cape">Western Cape</option>
+                    <option value="eastern-cape">Eastern Cape</option>
+                    <option value="limpopo">Limpopo</option>
+                    <option value="mpumalanga">Mpumalanga</option>
+                    <option value="north-west">North West</option>
+                    <option value="free-state">Free State</option>
+                    <option value="northern-cape">Northern Cape</option>
+                </select>
+                
+                <div id="province-info" class="province-info">
+                    <!-- Province information will appear here -->
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div id="district-section" style="display: none;">
+                    <label for="district">📍 Select District</label>
+                    <select id="district">
+                        <option value="">Select a district...</option>
+                        <!-- Districts will be populated based on province selection -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="crop-type">🌽 Select Crop Type</label>
+                <select id="crop-type" onchange="updateCropInfo()">
+                    <option value="">Choose crop type...</option>
+                    <option value="vegetables">Vegetables</option>
+                    <option value="fruits">Fruits</option>
+                    <option value="grains">Grains</option>
+                    <option value="legumes">Legumes</option>
+                    <option value="root-crops">Root Crops</option>
+                    <option value="herbs">Herbs</option>
+                    <option value="berries">Berries</option>
+                    <option value="nuts">Nuts</option>
+                    <option value="all">All Crops</option>
+                </select>
+                
+                <div id="crop-info" class="province-info" style="display: none;">
+                    <!-- Crop information will appear here -->
+                </div>
+            </div>
+            
+            <button class="generate-btn" onclick="generateCalendar()">
+                🌱 Generate Planting Calendar
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Page -->
+    <div id="results" class="page">
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Generating your planting calendar and charts...</p>
+        </div>
+        
+        <div class="results-header">
+            <h2 class="page-title">Results</h2>
+            <div class="selection-info">
+                <div class="info-badge">📍 Province: <span id="selected-province">Gauteng</span></div>
+                <div class="info-badge">🗺️ District: <span id="selected-district">Johannesburg</span></div>
+                <div class="info-badge">🌽 Crop Type: <span id="selected-crop">Vegetables</span></div>
+            </div>
+        </div>
+        
+        <div class="charts-section">
+            <h3>📈 Agricultural Data Visualizations</h3>
+            <div class="charts-grid">
+                <div class="chart-container">
+                    <div class="chart-title">📅 Planting Calendar Timeline</div>
+                    <div id="timeline_chart"></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">💧 Water Needs Analysis</div>
+                    <div id="water_chart"></div>
+                </div>
+                <div class="chart-container">
+                    <div class="chart-title">🌡️ Optimal Temperature Ranges</div>
+                    <div id="temperature_chart"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="calendar-grid" id="calendar-content">
+            <!-- Calendar cards will be generated here -->
+        </div>
+        
+        <div style="text-align: center;">
+            <a href="#generate" class="back-btn" onclick="showPage('generate')">← Generate New Calendar</a>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <p>© 2024 Crop Planting Calendar Generator. All rights reserved.</p>
+        <p style="margin-top: 0.5rem; opacity: 0.8; font-size: 0.9rem;">Supporting sustainable agriculture through better planning</p>
+    </footer>
+
+    <script>
+        // Load Google Charts
+        google.charts.load('current', {'packages':['timeline', 'bar', 'corechart']});
+        
+        // South African Provinces with Districts
+        const provinceData = {
+            'gauteng': {
+                name: 'Gauteng',
+                capital: 'Johannesburg',
+                climate: 'Subtropical highland',
+                rainfall: 'Summer rainfall (Oct-Apr)',
+                districts: [
+                    'Johannesburg Metro',
+                    'Tshwane Metro',
+                    'Ekurhuleni Metro',
+                    'Sedibeng District',
+                    'West Rand District'
+                ],
+                description: 'The economic hub of South Africa with varied urban and peri-urban farming'
+            },
+            'kwazulu-natal': {
+                name: 'KwaZulu-Natal',
+                capital: 'Pietermaritzburg',
+                climate: 'Subtropical to temperate',
+                rainfall: 'Summer rainfall, some areas year-round',
+                districts: [
+                    'eThekwini Metro',
+                    'Amajuba District',
+                    'Harry Gwala District',
+                    'iLembe District',
+                    'King Cetshwayo District',
+                    'uMgungundlovu District',
+                    'uMkhanyakude District',
+                    'uMzinyathi District',
+                    'uThukela District',
+                    'Zululand District'
+                ],
+                description: 'Coastal and inland regions with diverse agricultural opportunities'
+            },
+            'western-cape': {
+                name: 'Western Cape',
+                capital: 'Cape Town',
+                climate: 'Mediterranean',
+                rainfall: 'Winter rainfall (May-Aug)',
+                districts: [
+                    'City of Cape Town Metro',
+                    'Cape Winelands District',
+                    'Central Karoo District',
+                    'Garden Route District',
+                    'Overberg District',
+                    'West Coast District'
+                ],
+                description: 'Famous for wine, fruit, and wheat production'
+            },
+            'eastern-cape': {
+                name: 'Eastern Cape',
+                capital: 'Bhisho',
+                climate: 'Varied - coastal to semi-arid',
+                rainfall: 'Year-round with summer peaks',
+                districts: [
+                    'Buffalo City Metro',
+                    'Nelson Mandela Bay Metro',
+                    'Alfred Nzo District',
+                    'Amathole District',
+                    'Chris Hani District',
+                    'Joe Gqabi District',
+                    'OR Tambo District',
+                    'Sarah Baartman District'
+                ],
+                description: 'Diverse agriculture from coastal vegetables to inland livestock'
+            },
+            'limpopo': {
+                name: 'Limpopo',
+                capital: 'Polokwane',
+                climate: 'Tropical to subtropical',
+                rainfall: 'Summer rainfall',
+                districts: [
+                    'Capricorn District',
+                    'Mopani District',
+                    'Sekhukhune District',
+                    'Vhembe District',
+                    'Waterberg District'
+                ],
+                description: 'Major producer of tropical fruits, nuts, and vegetables'
+            },
+            'mpumalanga': {
+                name: 'Mpumalanga',
+                capital: 'Mbombela',
+                climate: 'Subtropical to temperate',
+                rainfall: 'Summer rainfall',
+                districts: [
+                    'Ehlanzeni District',
+                    'Gert Sibande District',
+                    'Nkangala District'
+                ],
+                description: 'Important for citrus, subtropical fruits, and forestry'
+            },
+            'north-west': {
+                name: 'North West',
+                capital: 'Mahikeng',
+                climate: 'Semi-arid',
+                rainfall: 'Summer thunderstorms',
+                districts: [
+                    'Bojanala Platinum District',
+                    'Dr Kenneth Kaunda District',
+                    'Dr Ruth Segomotsi Mompati District',
+                    'Ngaka Modiri Molema District'
+                ],
+                description: 'Maize and sunflower production in the east, livestock in the west'
+            },
+            'free-state': {
+                name: 'Free State',
+                capital: 'Bloemfontein',
+                climate: 'Continental',
+                rainfall: 'Summer rainfall',
+                districts: [
+                    'Fezile Dabi District',
+                    'Lejweleputswa District',
+                    'Mangaung Metro',
+                    'Thabo Mofutsanyane District',
+                    'Xhariep District'
+                ],
+                description: 'The breadbasket of South Africa with extensive grain farming'
+            },
+            'northern-cape': {
+                name: 'Northern Cape',
+                capital: 'Kimberley',
+                climate: 'Arid to semi-arid',
+                rainfall: 'Low, unpredictable',
+                districts: [
+                    'Frances Baard District',
+                    'John Taolo Gaetsewe District',
+                    'Namakwa District',
+                    'Pixley ka Seme District',
+                    'ZF Mgcawu District'
+                ],
+                description: 'Large-scale irrigation farming and livestock production'
+            }
+        };
+
+        // Crop data with growth days and planting windows
+        const cropData = {
+            'vegetables': [
+                { 
+                    name: 'Tomatoes', 
+                    icon: '🍅', 
+                    growthDays: 90,
+                    optimalTemp: '20-30°C',
+                    waterNeed: 'Medium-High',
+                    plantingWindows: {
+                        'gauteng': ['15-Sep', '30-Oct'],
+                        'kwazulu-natal': ['01-Sep', '15-Nov'],
+                        'western-cape': ['15-Aug', '30-Sep'],
+                        'eastern-cape': ['01-Sep', '15-Nov'],
+                        'limpopo': ['01-Aug', '30-Sep'],
+                        'mpumalanga': ['01-Sep', '15-Nov'],
+                        'north-west': ['15-Sep', '30-Oct'],
+                        'free-state': ['15-Sep', '30-Oct'],
+                        'northern-cape': ['01-Sep', '15-Oct']
+                    }
+                },
+                { 
+                    name: 'Spinach', 
+                    icon: '🥬', 
+                    growthDays: 45,
+                    optimalTemp: '15-20°C',
+                    waterNeed: 'High',
+                    plantingWindows: {
+                        'gauteng': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'kwazulu-natal': ['01-Mar', '15-May', '01-Sep', '15-Oct'],
+                        'western-cape': ['01-Mar', '15-May', '01-Aug', '15-Sep'],
+                        'eastern-cape': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'limpopo': ['01-Mar', '15-May', '01-Sep', '15-Oct'],
+                        'mpumalanga': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'north-west': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'free-state': ['01-Mar', '15-May', '01-Aug', '15-Sep'],
+                        'northern-cape': ['15-Mar', '30-Apr', '15-Aug', '30-Sep']
+                    }
+                },
+                { 
+                    name: 'Carrots', 
+                    icon: '🥕', 
+                    growthDays: 70,
+                    optimalTemp: '15-25°C',
+                    waterNeed: 'Medium',
+                    plantingWindows: {
+                        'gauteng': ['15-Feb', '15-Apr', '15-Aug', '15-Oct'],
+                        'kwazulu-natal': ['01-Mar', '15-May', '01-Sep', '15-Nov'],
+                        'western-cape': ['01-Mar', '15-May', '01-Aug', '15-Oct'],
+                        'eastern-cape': ['15-Feb', '15-Apr', '15-Aug', '15-Oct'],
+                        'limpopo': ['01-Mar', '15-May', '01-Sep', '15-Nov'],
+                        'mpumalanga': ['15-Feb', '15-Apr', '15-Aug', '15-Oct'],
+                        'north-west': ['15-Feb', '15-Apr', '15-Aug', '15-Oct'],
+                        'free-state': ['01-Mar', '15-May', '01-Aug', '15-Oct'],
+                        'northern-cape': ['15-Mar', '30-Apr', '15-Aug', '30-Oct']
+                    }
+                },
+                { 
+                    name: 'Cabbage', 
+                    icon: '🥬', 
+                    growthDays: 80,
+                    optimalTemp: '15-20°C',
+                    waterNeed: 'High',
+                    plantingWindows: {
+                        'gauteng': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'kwazulu-natal': ['01-Mar', '15-May', '01-Sep', '15-Oct'],
+                        'western-cape': ['01-Mar', '15-May', '01-Aug', '15-Sep'],
+                        'eastern-cape': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'limpopo': ['01-Mar', '15-May', '01-Sep', '15-Oct'],
+                        'mpumalanga': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'north-west': ['15-Feb', '15-Apr', '15-Aug', '15-Sep'],
+                        'free-state': ['01-Mar', '15-May', '01-Aug', '15-Sep'],
+                        'northern-cape': ['15-Mar', '30-Apr', '15-Aug', '30-Sep']
+                    }
+                }
+            ],
+            'fruits': [
+                { 
+                    name: 'Citrus', 
+                    icon: '🍊', 
+                    growthDays: 240,
+                    optimalTemp: '20-30°C',
+                    waterNeed: 'Medium',
+                    plantingWindows: {
+                        'gauteng': ['15-Jan', '15-Mar'],
+                        'kwazulu-natal': ['01-Jan', '31-Mar'],
+                        'western-cape': ['15-Jan', '15-Mar'],
+                        'eastern-cape': ['01-Jan', '31-Mar'],
+                        'limpopo': ['01-Jan', '31-Mar'],
+                        'mpumalanga': ['15-Jan', '15-Mar'],
+                        'north-west': ['15-Jan', '15-Mar'],
+                        'free-state': ['15-Jan', '15-Mar'],
+                        'northern-cape': ['01-Jan', '31-Mar']
+                    }
+                },
+                { 
+                    name: 'Apples', 
+                    icon: '🍎', 
+                    growthDays: 240,
+                    optimalTemp: '15-25°C',
+                    waterNeed: 'Medium',
+                    plantingWindows: {
+                        'gauteng': ['15-Jun', '15-Aug'],
+                        'kwazulu-natal': ['01-Jun', '31-Aug'],
+                        'western-cape': ['15-Jun', '15-Aug'],
+                        'eastern-cape': ['01-Jun', '31-Aug'],
+                        'limpopo': ['01-Jun', '31-Aug'],
+                        'mpumalanga': ['15-Jun', '15-Aug'],
+                        'north-west': ['15-Jun', '15-Aug'],
+                        'free-state': ['15-Jun', '15-Aug'],
+                        'northern-cape': ['01-Jun', '31-Aug']
+                    }
+                }
+            ],
+            'grains': [
+                { 
+                    name: 'Maize', 
+                    icon: '🌽', 
+                    growthDays: 180,
+                    optimalTemp: '20-30°C',
+                    waterNeed: 'Medium-High',
+                    plantingWindows: {
+                        'gauteng': ['15-Oct', '15-Dec'],
+                        'kwazulu-natal': ['01-Oct', '31-Dec'],
+                        'western-cape': ['15-Oct', '15-Dec'],
+                        'eastern-cape': ['01-Oct', '31-Dec'],
+                        'limpopo': ['01-Oct', '31-Dec'],
+                        'mpumalanga': ['15-Oct', '15-Dec'],
+                        'north-west': ['15-Oct', '15-Dec'],
+                        'free-state': ['15-Oct', '15-Dec'],
+                        'northern-cape': ['01-Oct', '31-Dec']
+                    }
+                },
+                { 
+                    name: 'Wheat', 
+                    icon: '🌾', 
+                    growthDays: 150,
+                    optimalTemp: '15-25°C',
+                    waterNeed: 'Medium',
+                    plantingWindows: {
+                        'gauteng': ['15-May', '15-Jul'],
+                        'kwazulu-natal': ['01-May', '31-Jul'],
+                        'western-cape': ['15-May', '15-Jul'],
+                        'eastern-cape': ['01-May', '31-Jul'],
+                        'limpopo': ['01-May', '31-Jul'],
+                        'mpumalanga': ['15-May', '15-Jul'],
+                        'north-west': ['15-May', '15-Jul'],
+                        'free-state': ['15-May', '15-Jul'],
+                        'northern-cape': ['01-May', '31-Jul']
+                    }
+                }
+            ],
+            'legumes': [
+                { 
+                    name: 'Beans', 
+                    icon: '🫘', 
+                    growthDays: 60,
+                    optimalTemp: '20-30°C',
+                    waterNeed: 'Medium',
+                    plantingWindows: {
+                        'gauteng': ['15-Sep', '15-Nov'],
+                        'kwazulu-natal': ['01-Sep', '30-Nov'],
+                        'western-cape': ['01-Sep', '15-Nov'],
+                        'eastern-cape': ['15-Sep', '15-Nov'],
+                        'limpopo': ['01-Sep', '30-Nov'],
+                        'mpumalanga': ['15-Sep', '15-Nov'],
+                        'north-west': ['15-Sep', '15-Nov'],
+                        'free-state': ['15-Sep', '15-Nov'],
+                        'northern-cape': ['01-Sep', '15-Nov']
+                    }
+                }
+            ]
+        };
+
+        // AI Knowledge Base for Farming Questions
+        const farmingKnowledge = {
+            // Planting times
+            'planting times': {
+                'tomatoes': 'Tomatoes should be planted in South Africa from August to November in most provinces. In warmer areas like Limpopo, plant from August to September. In cooler areas like Free State, plant from September to October.',
+                'maize': 'Maize (corn) should be planted from October to December. Early planting (October) gives better yields in most regions.',
+                'carrots': 'Carrots can be planted from February to April for autumn harvest, or August to October for spring harvest.',
+                'spinach': 'Spinach grows best in cooler weather. Plant from February to April or August to September.',
+                'cabbage': 'Cabbage should be planted from February to April or August to September.',
+                'general': 'Plant warm-season crops after the last frost. Cool-season crops can be planted in late summer or early autumn.'
+            },
+            
+            // Harvesting periods
+            'harvesting': {
+                'tomatoes': 'Harvest tomatoes 60-90 days after planting. Harvest when fruits are fully colored but firm. Pick regularly to encourage more production.',
+                'maize': 'Maize is ready for harvest 3-4 months after planting. Harvest when kernels are hard and dry. For sweet corn, harvest when kernels are milky.',
+                'carrots': 'Harvest carrots 60-80 days after planting. Harvest when roots are 1-2cm in diameter. Carrots can be left in ground until needed.',
+                'spinach': 'Harvest spinach 45-60 days after planting. Harvest outer leaves first, allowing center to continue growing. Harvest in morning for best quality.',
+                'cabbage': 'Harvest cabbage 80-180 days after planting. Harvest when heads are firm and solid. Cut at base with a sharp knife.',
+                'general': 'Harvest in the morning when plants are cool. Handle produce gently to avoid bruising. Store properly immediately after harvest.'
+            },
+            
+            // Soil management
+            'soil': {
+                'sandy': 'For sandy soil: Add compost or manure to improve water retention. Use mulch to reduce evaporation. Sandy soil warms quickly in spring, allowing earlier planting.',
+                'clay': 'For clay soil: Add organic matter to improve drainage. Avoid working clay soil when wet. Consider raised beds for better drainage.',
+                'improvement': 'Improve any soil by adding compost, manure, or other organic matter. Test soil pH and adjust as needed. Most crops prefer pH 6.0-7.0.'
+            },
+            
+            // Pest control
+            'pest': {
+                'general': 'Use integrated pest management: 1) Monitor regularly 2) Use physical barriers 3) Introduce beneficial insects 4) Use organic pesticides as last resort',
+                'aphids': 'Control aphids with insecticidal soap or neem oil. Encourage ladybugs and lacewings that eat aphids.',
+                'caterpillars': 'Handpick caterpillars or use Bacillus thuringiensis (Bt) for organic control.',
+                'fungal': 'Prevent fungal diseases by spacing plants properly, watering at the base, and ensuring good air circulation.'
+            },
+            
+            // Water management
+            'water': {
+                'tomatoes': 'Tomatoes need consistent watering, about 2.5-5cm per week. Water deeply but less frequently to encourage deep roots.',
+                'spinach': 'Spinach needs consistent moisture. Water regularly, about 2.5cm per week. Mulch to retain soil moisture.',
+                'carrots': 'Carrots need consistent moisture for straight roots. Water 2.5cm per week. Avoid water stress which causes splitting.',
+                'maize': 'Maize needs 2.5-5cm of water per week, especially during tasseling and ear development.',
+                'general': 'Water early in the morning to reduce evaporation. Use drip irrigation for efficiency. Mulch to retain soil moisture.',
+                'conservation': 'Collect rainwater, use drought-tolerant varieties, and practice mulching to conserve water.'
+            },
+            
+            // Fertilizer
+            'fertilizer': {
+                'general': 'Use balanced fertilizer (N-P-K) according to soil test results. Organic options include compost, manure, bone meal, and fish emulsion.',
+                'vegetables': 'Most vegetables need nitrogen for leaf growth, phosphorus for root development, and potassium for fruit production.',
+                'tomatoes': 'Tomatoes need balanced fertilizer at planting, then higher potassium when flowering. Avoid too much nitrogen which reduces fruiting.',
+                'organic': 'Organic fertilizers release nutrients slowly and improve soil structure. Examples: compost, manure, worm castings, seaweed extract.'
+            },
+            
+            // Climate specific
+            'climate': {
+                'gauteng': 'Gauteng has summer rainfall. Plant warm-season crops in spring after last frost (usually mid-September).',
+                'western cape': 'Western Cape has winter rainfall. Plant in autumn for winter crops, or in spring with irrigation.',
+                'kwazulu natal': 'KwaZulu-Natal has subtropical climate with year-round planting opportunities in coastal areas.',
+                'limpopo': 'Limpopo is hot and dry. Plant drought-tolerant varieties and use irrigation. Planting can start earlier here.'
+            },
+            
+            // General advice
+            'general': {
+                'companion planting': 'Plant marigolds with tomatoes to deter nematodes. Basil improves tomato flavor and repels pests. Beans fix nitrogen for heavy feeders.',
+                'crop rotation': 'Rotate crops to prevent soil depletion and disease buildup. Don\'t plant the same family in the same spot for 3-4 years.',
+                'organic farming': 'Use compost, cover crops, and natural pest control. Avoid synthetic chemicals. Build healthy soil for healthy plants.'
+            }
+        };
+        
+        // Store current crops for AI reference
+        let currentCrops = [];
+        
+        // Navigation
+        function showPage(pageId) {
+            // Update navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Activate current page link
+            document.querySelector(`.nav-link[onclick*="${pageId}"]`).classList.add('active');
+            
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            
+            // Show selected page
+            document.getElementById(pageId).classList.add('active');
+            
+            // Initialize chatbot if needed
+            if (pageId === 'chatbot') {
+                initializeChatbot();
+            }
+        }
+        
+        // Update province information when selected
+        function updateProvinceInfo() {
+            const province = document.getElementById('province').value;
+            const provinceInfo = document.getElementById('province-info');
+            const districtSection = document.getElementById('district-section');
+            const districtSelect = document.getElementById('district');
+            
+            if (province && provinceData[province]) {
+                const data = provinceData[province];
+                
+                provinceInfo.innerHTML = `
+                    <h4>${data.name}</h4>
+                    <p><strong>Capital:</strong> ${data.capital}</p>
+                    <p><strong>Climate:</strong> ${data.climate}</p>
+                    <p><strong>Rainfall Pattern:</strong> ${data.rainfall}</p>
+                    <p><strong>Description:</strong> ${data.description}</p>
+                `;
+                
+                // Populate districts
+                districtSelect.innerHTML = '<option value="">Select a district...</option>';
+                data.districts.forEach(district => {
+                    const option = document.createElement('option');
+                    option.value = district;
+                    option.textContent = district;
+                    districtSelect.appendChild(option);
+                });
+                
+                districtSection.style.display = 'block';
+            } else {
+                provinceInfo.innerHTML = '';
+                districtSection.style.display = 'none';
+            }
+        }
+        
+        // Update crop information when selected
+        function updateCropInfo() {
+            const cropType = document.getElementById('crop-type').value;
+            const cropInfo = document.getElementById('crop-info');
+            
+            if (cropType && cropData[cropType]) {
+                const crops = cropData[cropType];
+                
+                cropInfo.innerHTML = `
+                    <h4>${cropType.charAt(0).toUpperCase() + cropType.slice(1)}</h4>
+                    <p>Includes: ${crops.map(crop => crop.name).join(', ')}</p>
+                `;
+                cropInfo.style.display = 'block';
+            } else {
+                cropInfo.innerHTML = '';
+                cropInfo.style.display = 'none';
+            }
+        }
+        
+        // Generate charts
+        function generateCharts(crops, province) {
+            // Generate timeline chart
+            generateTimelineChart(crops, province);
+            
+            // Generate water needs chart
+            generateWaterChart(crops);
+            
+            // Generate temperature chart
+            generateTemperatureChart(crops);
+        }
+        
+        // Generate timeline chart
+        function generateTimelineChart(crops, province) {
+            if (!crops || crops.length === 0) return;
+            
+            const dataTable = new google.visualization.DataTable();
+            dataTable.addColumn({ type: 'string', id: 'Crop' });
+            dataTable.addColumn({ type: 'string', id: 'Name' });
+            dataTable.addColumn({ type: 'date', id: 'Start' });
+            dataTable.addColumn({ type: 'date', id: 'End' });
+            
+            const currentYear = new Date().getFullYear();
+            
+            crops.forEach((crop, index) => {
+                const plantingWindows = crop.plantingWindows[province];
+                if (plantingWindows && Array.isArray(plantingWindows)) {
+                    plantingWindows.forEach(window => {
+                        if (typeof window === 'string') {
+                            const [day, month] = window.split('-');
+                            const monthIndex = getMonthIndex(month);
+                            if (monthIndex !== -1) {
+                                const startDate = new Date(currentYear, monthIndex, parseInt(day));
+                                const endDate = new Date(startDate);
+                                endDate.setDate(endDate.getDate() + 14); // 2-week planting window
+                                
+                                dataTable.addRow([
+                                    crop.name,
+                                    crop.name,
+                                    startDate,
+                                    endDate
+                                ]);
+                            }
+                        }
+                    });
+                }
+            });
+            
+            const options = {
+                height: 350,
+                timeline: { 
+                    showRowLabels: false,
+                    colorByRowLabel: true
+                },
+                colors: ['#2e7d32', '#4caf50', '#8bc34a', '#cddc39', '#ffeb3b'],
+                backgroundColor: '#f8f9fa'
+            };
+            
+            const chart = new google.visualization.Timeline(document.getElementById('timeline_chart'));
+            chart.draw(dataTable, options);
+        }
+        
+        // Generate water needs chart
+        function generateWaterChart(crops) {
+            if (!crops || crops.length === 0) return;
+            
+            const waterLevels = {
+                'Low': 0,
+                'Medium': 0,
+                'High': 0,
+                'Medium-High': 0
+            };
+            
+            crops.forEach(crop => {
+                waterLevels[crop.waterNeed] = (waterLevels[crop.waterNeed] || 0) + 1;
+            });
+            
+            const data = google.visualization.arrayToDataTable([
+                ['Water Need', 'Number of Crops'],
+                ['Low', waterLevels['Low'] || 0],
+                ['Medium', waterLevels['Medium'] || 0],
+                ['High', waterLevels['High'] || 0],
+                ['Medium-High', waterLevels['Medium-High'] || 0]
+            ]);
+            
+            const options = {
+                height: 350,
+                title: 'Water Requirements Analysis',
+                colors: ['#6A89CC', '#4A69BD', '#1E3799', '#0C2461'],
+                backgroundColor: '#f8f9fa',
+                legend: { position: 'top' },
+                bar: { groupWidth: '75%' },
+                isStacked: true
+            };
+            
+            const chart = new google.visualization.ColumnChart(document.getElementById('water_chart'));
+            chart.draw(data, options);
+        }
+        
+        // Generate temperature chart
+        function generateTemperatureChart(crops) {
+            if (!crops || crops.length === 0) return;
+            
+            const data = [['Crop', 'Min Temp (°C)', 'Max Temp (°C)']];
+            
+            crops.forEach(crop => {
+                const tempRange = crop.optimalTemp.replace('°C', '').split('-');
+                if (tempRange.length === 2) {
+                    const minTemp = parseInt(tempRange[0].trim());
+                    const maxTemp = parseInt(tempRange[1].trim());
+                    data.push([crop.name, minTemp, maxTemp]);
+                }
+            });
+            
+            const dataTable = google.visualization.arrayToDataTable(data);
+            
+            const options = {
+                height: 350,
+                title: 'Optimal Temperature Ranges',
+                hAxis: {
+                    title: 'Temperature (°C)',
+                    minValue: 0,
+                    maxValue: 35
+                },
+                vAxis: {
+                    title: 'Crop'
+                },
+                colors: ['#4caf50', '#2e7d32'],
+                backgroundColor: '#f8f9fa'
+            };
+            
+            const chart = new google.visualization.BarChart(document.getElementById('temperature_chart'));
+            chart.draw(dataTable, options);
+        }
+        
+        // Helper function to get month index
+        function getMonthIndex(monthAbbrev) {
+            const months = {
+                'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+                'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+            };
+            return months[monthAbbrev] !== undefined ? months[monthAbbrev] : -1;
+        }
+        
+        // Initialize chatbot
+        function initializeChatbot() {
+            const chatContainer = document.getElementById('chatMessages');
+            chatContainer.innerHTML = '';
+            
+            // Add welcome message
+            addChatMessage('ai', 'Hello! I\'m your farming assistant. I can help with questions about crop planting, harvesting, pest control, soil management, and more. How can I help you today?');
+        }
+        
+        // Add message to chat
+        function addChatMessage(sender, text) {
+            const chatContainer = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👨‍🌾' : '🤖';
+            const avatarClass = sender === 'user' ? 'user' : 'ai';
+            const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${avatarClass}">${avatar}</div>
+                <div class="message-content">
+                    <div class="message-text">${formatMessageText(text)}</div>
+                    <div class="message-time">${time}</div>
+                </div>
+            `;
+            
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+        
+        // Handle key press in chat
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Send message in main chatbot
+        function sendMessage() {
+            const input = document.getElementById('userInput');
+            const question = input.value.trim();
+            
+            if (!question) return;
+            
+            // Add user message
+            addChatMessage('user', question);
+            
+            // Clear input
+            input.value = '';
+            
+            // Get AI response
+            setTimeout(() => {
+                const response = getAIResponse(question);
+                addChatMessage('ai', response);
+            }, 500);
+        }
+        
+        // Get AI response for main chatbot
+        function getAIResponse(question) {
+            const lowerQuestion = question.toLowerCase();
+            let response = '';
+            
+            // Check for specific crop questions
+            for (const [category, knowledge] of Object.entries(farmingKnowledge)) {
+                for (const [key, value] of Object.entries(knowledge)) {
+                    if (lowerQuestion.includes(key)) {
+                        if (category === 'planting times' && key !== 'general') {
+                            response = `🌱 **Planting Time for ${key.charAt(0).toUpperCase() + key.slice(1)}:**\n\n${value}`;
+                            return response;
+                        } else if (category === 'harvesting' && key !== 'general') {
+                            response = `✂️ **Harvesting ${key.charAt(0).toUpperCase() + key.slice(1)}:**\n\n${value}`;
+                            return response;
+                        } else if (category === 'water' && key !== 'general' && key !== 'conservation') {
+                            response = `💧 **Water Requirements for ${key.charAt(0).toUpperCase() + key.slice(1)}:**\n\n${value}`;
+                            return response;
+                        }
+                    }
+                }
+            }
+            
+            // Check for category questions
+            if (lowerQuestion.includes('plant') || lowerQuestion.includes('planting time')) {
+                const cropMatch = Object.keys(farmingKnowledge['planting times']).find(crop => 
+                    lowerQuestion.includes(crop)
+                );
+                response = cropMatch ? 
+                    `🌱 **Planting Time for ${cropMatch.charAt(0).toUpperCase() + cropMatch.slice(1)}:**\n\n${farmingKnowledge['planting times'][cropMatch]}` :
+                    `🌱 **General Planting Times:**\n\n${farmingKnowledge['planting times']['general']}`;
+            } 
+            else if (lowerQuestion.includes('harvest') || lowerQuestion.includes('when to pick')) {
+                response = `✂️ **Harvesting Guidelines:**\n\n${farmingKnowledge['harvesting']['general']}`;
+            }
+            else if (lowerQuestion.includes('water') || lowerQuestion.includes('irrigation')) {
+                response = `💧 **Water Management:**\n\n${farmingKnowledge['water']['general']}\n\n${farmingKnowledge['water']['conservation']}`;
+            }
+            else if (lowerQuestion.includes('soil') || lowerQuestion.includes('dirt')) {
+                if (lowerQuestion.includes('sandy')) {
+                    response = `🌱 **Sandy Soil Management:**\n\n${farmingKnowledge['soil']['sandy']}`;
+                } else if (lowerQuestion.includes('clay')) {
+                    response = `🌱 **Clay Soil Management:**\n\n${farmingKnowledge['soil']['clay']}`;
+                } else {
+                    response = `🌱 **Soil Improvement:**\n\n${farmingKnowledge['soil']['improvement']}`;
+                }
+            }
+            else if (lowerQuestion.includes('pest') || lowerQuestion.includes('insect') || lowerQuestion.includes('bug')) {
+                response = `🐛 **Pest Control:**\n\n${farmingKnowledge['pest']['general']}`;
+            }
+            else if (lowerQuestion.includes('fertilizer') || lowerQuestion.includes('fertiliser') || lowerQuestion.includes('nutrient')) {
+                response = `🌾 **Fertilizer Recommendations:**\n\n${farmingKnowledge['fertilizer']['general']}`;
+            }
+            else if (lowerQuestion.includes('gauteng') || lowerQuestion.includes('cape') || lowerQuestion.includes('kwazulu') || lowerQuestion.includes('limpopo')) {
+                if (lowerQuestion.includes('gauteng')) {
+                    response = `📍 **Gauteng Climate:**\n\n${farmingKnowledge['climate']['gauteng']}`;
+                } else if (lowerQuestion.includes('western cape')) {
+                    response = `📍 **Western Cape Climate:**\n\n${farmingKnowledge['climate']['western cape']}`;
+                } else if (lowerQuestion.includes('kwazulu')) {
+                    response = `📍 **KwaZulu-Natal Climate:**\n\n${farmingKnowledge['climate']['kwazulu natal']}`;
+                } else if (lowerQuestion.includes('limpopo')) {
+                    response = `📍 **Limpopo Climate:**\n\n${farmingKnowledge['climate']['limpopo']}`;
+                }
+            }
+            else if (lowerQuestion.includes('companion') || lowerQuestion.includes('plant together')) {
+                response = `🤝 **Companion Planting:**\n\n${farmingKnowledge['general']['companion planting']}`;
+            }
+            else if (lowerQuestion.includes('rotation') || lowerQuestion.includes('rotate crop')) {
+                response = `🔄 **Crop Rotation:**\n\n${farmingKnowledge['general']['crop rotation']}`;
+            }
+            else if (lowerQuestion.includes('organic') || lowerQuestion.includes('natural')) {
+                response = `🌿 **Organic Farming:**\n\n${farmingKnowledge['general']['organic farming']}`;
+            }
+            else {
+                response = `🤖 **I can help with:**\n\n` +
+                    `• **Planting times** for specific crops\n` +
+                    `• **Harvesting** guidelines\n` +
+                    `• **Water management** and irrigation\n` +
+                    `• **Soil improvement** techniques\n` +
+                    `• **Pest control** methods\n` +
+                    `• **Fertilizer** recommendations\n` +
+                    `• **Climate-specific** advice for South African provinces\n` +
+                    `• **Companion planting** and crop rotation\n\n` +
+                    `Try asking something like:\n` +
+                    `"When should I plant tomatoes in Gauteng?"\n` +
+                    `"How much water do carrots need?"\n` +
+                    `"What's the best fertilizer for maize?"`;
+            }
+            
+            return response;
+        }
+        
+        // Format message text with line breaks
+        function formatMessageText(text) {
+            return text.replace(/\n/g, '<br>');
+        }
+
+        // Generate calendar
+        function generateCalendar() {
+            const province = document.getElementById('province').value;
+            const district = document.getElementById('district').value;
+            const cropType = document.getElementById('crop-type').value;
+            
+            if (!province || !district || !cropType) {
+                alert('Please select province, district, and crop type.');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('loading').classList.add('active');
+            
+            // Update selection display
+            const provinceDataObj = provinceData[province];
+            document.getElementById('selected-province').textContent = provinceDataObj.name;
+            document.getElementById('selected-district').textContent = district;
+            document.getElementById('selected-crop').textContent = 
+                document.querySelector(`#crop-type option[value="${cropType}"]`).textContent;
+            
+            // Get crops to display
+            let cropsToDisplay = [];
+            if (cropType === 'all') {
+                // Combine all crop types
+                Object.values(cropData).forEach(typeCrops => {
+                    cropsToDisplay = cropsToDisplay.concat(typeCrops);
+                });
+            } else {
+                cropsToDisplay = cropData[cropType] || [];
+            }
+            
+            // Store current crops for AI reference
+            currentCrops = [];
+            
+            // Wait for Google Charts to load, then generate charts
+            google.charts.setOnLoadCallback(() => {
+                generateCharts(cropsToDisplay, province);
+                
+                // Display calendar
+                displayCalendar(cropsToDisplay, province);
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('active');
+            });
+            
+            // Show results page
+            showPage('results');
+        }
+
+        // Display calendar with harvesting periods
+        function displayCalendar(crops, province) {
+            const calendarContent = document.getElementById('calendar-content');
+            const currentYear = new Date().getFullYear();
+            
+            if (crops.length === 0) {
+                calendarContent.innerHTML = '<p style="text-align: center; grid-column: 1/-1; padding: 2rem; background: white; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">No crops found for your selection.</p>';
+                return;
+            }
+            
+            let calendarHTML = '';
+            
+            crops.forEach(crop => {
+                // Get planting window for this province
+                const plantingWindows = crop.plantingWindows[province];
+                if (!plantingWindows) return;
+                
+                // Format planting windows
+                const plantingWindowStr = Array.isArray(plantingWindows) 
+                    ? plantingWindows.join(', ')
+                    : plantingWindows;
+                
+                // Calculate harvesting period
+                let harvestPeriod = '';
+                let harvestNotes = '';
+                
+                if (Array.isArray(plantingWindows)) {
+                    const firstPlanting = plantingWindows[0];
+                    if (typeof firstPlanting === 'string') {
+                        const [day, month] = firstPlanting.split('-');
+                        const plantDate = new Date(currentYear, getMonthIndex(month), parseInt(day));
+                        const harvestDate = new Date(plantDate);
+                        harvestDate.setDate(harvestDate.getDate() + crop.growthDays);
+                        
+                        // Calculate harvest period (3-4 week window)
+                        const harvestStart = new Date(harvestDate);
+                        harvestStart.setDate(harvestStart.getDate() - 7);
+                        const harvestEnd = new Date(harvestDate);
+                        harvestEnd.setDate(harvestEnd.getDate() + 14);
+                        
+                        harvestPeriod = `${formatDate(harvestStart)} to ${formatDate(harvestEnd)}`;
+                        harvestNotes = `Harvest approximately ${crop.growthDays} days after planting`;
+                    }
+                }
+                
+                // Store crop data for AI reference
+                currentCrops.push({
+                    name: crop.name,
+                    plantingWindow: plantingWindowStr,
+                    harvestPeriod: harvestPeriod,
+                    growthDays: crop.growthDays,
+                    optimalTemp: crop.optimalTemp,
+                    waterNeed: crop.waterNeed
+                });
+                
+                calendarHTML += `
+                    <div class="crop-card">
+                        <div class="crop-header">
+                            <div class="crop-name">${crop.name}</div>
+                            <div class="crop-icon">${crop.icon}</div>
+                        </div>
+                        <div class="crop-details">
+                            <div class="detail-row">
+                                <span class="detail-label">📅 Planting Window:</span>
+                                <span class="detail-value date-value">${plantingWindowStr}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">⏳ Harvesting Period:</span>
+                                <span class="detail-value harvest-period">${harvestPeriod}</span>
+                            </div>
+                            ${harvestNotes ? `<div class="harvest-note">${harvestNotes}</div>` : ''}
+                            <div class="detail-row">
+                                <span class="detail-label">⏱️ Growth Period:</span>
+                                <span class="detail-value">${crop.growthDays} days</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">🌡️ Optimal Temp:</span>
+                                <span class="detail-value">${crop.optimalTemp}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="detail-label">💧 Water Needs:</span>
+                                <span class="detail-value">${crop.waterNeed}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            calendarContent.innerHTML = calendarHTML;
+        }
+        
+        // Helper function to format date
+        function formatDate(date) {
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            return `${date.getDate()} ${months[date.getMonth()]}`;
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Set initial active page
+            showPage('home');
+        });
+    </script>
+</body>
+</html>
